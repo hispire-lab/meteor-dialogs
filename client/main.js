@@ -8,6 +8,7 @@ Dialog = function Dialog() {
 
 Dialog.prototype.alert = function(options) {
   this._itemOptions.push({
+    dialog: this,
     dialogItemOptions: options
   });
   return this;
@@ -58,8 +59,9 @@ Template.dialog_buttons_list.events({
             name: 'success',
             label: 'Success',
             className: 'btn-success',
-            callback: function() {
+            callback: function(next) {
               console.log('success called');
+              next();
             }
           },
         ]
@@ -75,6 +77,7 @@ Template.dialog_buttons_list.events({
 Template.dialog_button.events({
   'click .btn': function(e, instance) {
     e.preventDefault();
-    instance.data.button.callback();
+    var next = instance.data.dialog.show;
+    instance.data.button.callback(next.bind(instance.data.dialog));
   }
 })
