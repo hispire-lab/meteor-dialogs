@@ -1,0 +1,45 @@
+<head>
+  <title>Meteor dialogs</title>
+</head>
+
+<body>
+  <h1>Meteor dialogs</h1>
+  {{> dialog_buttons_list}}
+</body>
+
+<Template name='dialog_buttons_list'>
+  <button type="button" class="btn btn-default js-dialog-show">Show dialog</button>
+</Template>
+
+<Template name='hello'>
+  <p>Hello world!</p>
+</Template>
+
+<Template name='bye'>
+  <p>Goodbye world!</p>
+</Template>
+
+<Template name='dialog_item'>
+  <div class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title">{{dialogItemOptions.title}}</h4>
+        </div>
+        <div class="modal-body">
+          {{> Template.dynamic template=dialogItemOptions.template}}
+        </div>
+        <div class="modal-footer">
+          {{#each button in dialogItemOptions.buttons}}
+            {{> dialog_button button=button}}
+          {{/each}}
+        </div>
+      </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+  </div><!-- /.modal -->
+</Template>
+
+<Template name='dialog_button'>
+  <button type="button" class="btn {{button.className}}">{{button.label}}</button>
+</Template>
