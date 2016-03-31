@@ -4,23 +4,47 @@ import './main.html';
 
 Dialog = function Dialog() {
   this._itemOptions = [];
+  this._currentItem;
 };
 
 Dialog.prototype.alert = function(options) {
   this._itemOptions.push({
     dialog: this,
+    dialogItemType: 'alert',
     dialogItemOptions: options
   });
   return this;
 };
 
-Dialog.prototype.confirm = function() {};
+Dialog.prototype.confirm = function(options) {
+  options.buttons = [
+    {
+      name: 'cancel',
+      label: 'Cancel',
+      className: 'btn-default'
+    },
+    {
+      name: 'ok',
+      label: 'Ok',
+      className: 'btn-success',
+    },
+  ]
+  this._itemOptions.push({
+    dialog: this,
+    dialogItemType: 'confirm',
+    dialogItemOptions: options
+  });
+  return this;
+};
 
 Dialog.prototype.prompt = function() {};
 
 Dialog.prototype.show = function() {
+  var item;
   if ( this._itemOptions.length > 0 ) {
-    this._renderItem(this._itemOptions.shift());
+    item = this._itemOptions.shift();
+    this._currentItem = item;
+    this._renderItem(item);
   }
 };
 
@@ -66,6 +90,14 @@ Template.dialog_buttons_list.events({
           },
         ]
       })
+      .confirm({
+        title: 'Confirm',
+        template: 'confirm',
+        callback: function(next, result) {
+          console.log('confirm called with result: ', result);
+          if ( result ) { next() }
+        }
+      })
       .alert({
         title: 'Goodbye',
         template: 'bye'
@@ -77,7 +109,19 @@ Template.dialog_buttons_list.events({
 Template.dialog_button.events({
   'click .btn': function(e, instance) {
     e.preventDefault();
-    var next = instance.data.dialog.show;
-    instance.data.button.callback(next.bind(instance.data.dialog));
+    var data   = instance.data;
+    var dialog = data.dialog;
+    var next   = dialog.show;
+    var type   = data.dialogItemType;
+    var result;
+
+    if ( type === 'confirm' ) {
+      result = $(e.target).text() === 'Ok';
+      dialog._currentItem.dialogItemOptions.callback(next.bind(dialog), result);
+
+    }
+    else {
+      data.button.callback(next.bind(dialog));
+    }
   }
 })

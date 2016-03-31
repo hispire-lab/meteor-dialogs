@@ -19,6 +19,10 @@
   <p>Goodbye world!</p>
 </Template>
 
+<Template name='confirm'>
+  <p>Are you sure?</p>
+</Template>
+
 <Template name='dialog_item'>
   <div class="modal fade" tabindex="-1" role="dialog">
     <div class="modal-dialog">
@@ -31,9 +35,12 @@
           {{> Template.dynamic template=dialogItemOptions.template}}
         </div>
         <div class="modal-footer">
+
           {{#each button in dialogItemOptions.buttons}}
-            {{> dialog_button button=button dialog=dialog}}
+            {{> dialog_button button=button dialog=dialog dialogItemType=dialogItemType}}
           {{/each}}
+
+
         </div>
       </div><!-- /.modal-content -->
     </div><!-- /.modal-dialog -->
