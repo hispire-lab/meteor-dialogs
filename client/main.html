@@ -29,15 +29,15 @@
       <div class="modal-content">
         <div class="modal-header">
           <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-          <h4 class="modal-title">{{dialogItemOptions.title}}</h4>
+          <h4 class="modal-title">{{dialogItem.title}}</h4>
         </div>
         <div class="modal-body">
-          {{> Template.dynamic template=dialogItemOptions.template}}
+          {{> Template.dynamic template=dialogItem.template}}
         </div>
         <div class="modal-footer">
 
-          {{#each button in dialogItemOptions.buttons}}
-            {{> dialog_button button=button dialog=dialog dialogItemType=dialogItemType}}
+          {{#each button in dialogItem.buttons}}
+            {{> dialog_item_button button=button dialog=dialogItem.dialog dialogItem=dialogItem.instance dialogItemType=dialogItem.type}}
           {{/each}}
 
 
@@ -47,6 +47,6 @@
   </div><!-- /.modal -->
 </Template>
 
-<Template name='dialog_button'>
+<Template name='dialog_item_button'>
   <button type="button" class="btn {{button.className}}">{{button.label}}</button>
 </Template>
