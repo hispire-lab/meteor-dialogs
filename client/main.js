@@ -9,6 +9,7 @@ function DialogItem(dialog, type, options, callback) {
   this._options = options;
   this._callback = callback;
   this._view = {};
+  this._$modal = {};
 }
 
 DialogItem.prototype = {
@@ -27,13 +28,15 @@ DialogItem.prototype = {
   },
 
   show() {
-    this._view = Blaze.renderWithData(Template.dialog_item, this._getDataCtx(), $('body').get(0));
+    const $body = $('body');
+    this._view = Blaze.renderWithData(Template.dialog_item, this._getDataCtx(), $body.get(0));
+    this._$modal = $body.find('.modal');
   },
 
-  hide($modal) {
+  hide() {
     const self = this;
-    $modal.on('hidden.bs.modal', () => Blaze.remove(self._view));
-    $modal.modal('hide');
+    this._$modal.on('hidden.bs.modal', () => Blaze.remove(self._view));
+    this._$modal.modal('hide');
   },
 
 };
@@ -108,25 +111,21 @@ Template.dialog_item.onRendered(() => {
   $(instance.firstNode).modal('show');
 });
 
-Template.dialog_item_button.onCreated(function dialogItemButtonOnCreated() {
-  this.closeModal = ($modal) => $modal.modal('hide');
-});
-
 Template.dialog_item_button.events({
   'click .btn': (e, instance) => {
     e.preventDefault();
 
     const data = instance.data;
-    const $modal = $(e.target).closest('.modal');
+    const $modal = data.dialogItem._$modal;
 
     $modal.on('hidden.bs.modal', () => {
       data.button.callback(
         data.dialog.next.bind(data.dialog),
         data.dialog.prev.bind(data.dialog),
-        instance.closeModal.bind({}, $modal)
+        () => $modal.modal('hide')
       );
     });
-    data.dialogItem.hide($modal);
+    data.dialogItem.hide();
   },
 });
 
