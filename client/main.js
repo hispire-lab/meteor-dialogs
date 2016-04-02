@@ -31,11 +31,10 @@ DialogItem.prototype = {
     const $body = $('body');
     this._view = Blaze.renderWithData(Template.dialog_item, this._getDataCtx(), $body.get(0));
     this._$modal = $body.find('.modal');
+    this._$modal.on('hidden.bs.modal', () => Blaze.remove(this._view));
   },
 
   hide() {
-    const self = this;
-    this._$modal.on('hidden.bs.modal', () => Blaze.remove(self._view));
     this._$modal.modal('hide');
   },
 
