@@ -3,6 +3,11 @@ import { $ } from 'meteor/jquery';
 import { Template } from 'meteor/templating';
 import './main.html';
 
+/*
+ *
+ *
+ *
+ */
 function DialogItem(dialog, type, options, callback) {
   this._dialog = dialog;
   this._type = type;
@@ -28,14 +33,41 @@ DialogItem.prototype = {
   },
 
   show() {
-    const $body = $('body');
-    this._view = Blaze.renderWithData(Template.dialog_item, this._getDataCtx(), $body.get(0));
-    this._$modal = $body.find('.modal');
-    this._$modal.on('hidden.bs.modal', () => Blaze.remove(this._view));
+    this._render();
   },
 
   hide() {
     this._$modal.modal('hide');
+  },
+
+  _getButtonByName(name) {
+    return this._options.buttons.filter((button) => button.name === name)[0];
+  },
+
+  _render() {
+    const $body = $('body');
+    this._view = Blaze.renderWithData(Template.dialog_item, this._getDataCtx(), $body.get(0));
+    this._setModal($body.find('.modal'));
+  },
+
+  _setModal($modal) {
+    this._$modal = $modal;
+    this._$modal.on('hidden.bs.modal', () => Blaze.remove(this._view));
+
+    const self = this;
+    this._$modal
+      .find('.btn')
+      .on('click', (e) => {
+        const button = self._getButtonByName($(e.target).data('button-name'));
+        self._$modal.on('hidden.bs.modal', () => {
+          button.callback(
+            self._dialog.next.bind(self._dialog),
+            self._dialog.prev.bind(self._dialog),
+            () => self._$modal.modal('hide')
+          );
+        });
+        self.hide();
+      });
   },
 
 };
@@ -110,24 +142,6 @@ Template.dialog_item.onRendered(() => {
   $(instance.firstNode).modal('show');
 });
 
-Template.dialog_item_button.events({
-  'click .btn': (e, instance) => {
-    e.preventDefault();
-
-    const data = instance.data;
-    const $modal = data.dialogItem._$modal;
-
-    $modal.on('hidden.bs.modal', () => {
-      data.button.callback(
-        data.dialog.next.bind(data.dialog),
-        data.dialog.prev.bind(data.dialog),
-        () => $modal.modal('hide')
-      );
-    });
-    data.dialogItem.hide();
-  },
-});
-
 Template.dialog_buttons_list.events({
   'click .js-dialog-show': (e) => {
     e.preventDefault();
@@ -174,6 +188,10 @@ Template.dialog_buttons_list.events({
             callback: (next) => next(),
           },
         ],
+      })
+      .alert({
+        title: 'Chao',
+        template: 'bye',
       })
       .show();
   },
