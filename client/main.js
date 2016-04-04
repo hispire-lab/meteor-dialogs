@@ -3,11 +3,6 @@ import { $ } from 'meteor/jquery';
 import { Template } from 'meteor/templating';
 import './main.html';
 
-/*
- *
- *
- *
- */
 function DialogItem(dialog, type, options, callback) {
   this._dialog = dialog;
   this._type = type;
@@ -15,6 +10,21 @@ function DialogItem(dialog, type, options, callback) {
   this._callback = callback;
   this._view = {};
   this._$modal = {};
+
+  if (this._type === 'confirm') {
+    this._options.buttons = [
+      {
+        name: 'no',
+        label: 'No',
+        className: 'btn-default',
+      },
+      {
+        name: 'yes',
+        label: 'Yes',
+        className: 'btn-success',
+      },
+    ];
+  }
 }
 
 DialogItem.prototype = {
@@ -54,20 +64,40 @@ DialogItem.prototype = {
     this._$modal = $modal;
     this._$modal.on('hidden.bs.modal', () => Blaze.remove(this._view));
 
-    const self = this;
-    this._$modal
-      .find('.btn')
-      .on('click', (e) => {
-        const button = self._getButtonByName($(e.target).data('button-name'));
-        self._$modal.on('hidden.bs.modal', () => {
-          button.callback(
-            self._dialog.next.bind(self._dialog),
-            self._dialog.prev.bind(self._dialog),
-            () => self._$modal.modal('hide')
-          );
+    if (this._type === 'alert') {
+      this._$modal.on('hidden.bs.modal', () => this._dialog.next());
+    } else if (this._type === 'confirm') {
+      const self = this;
+      this._$modal
+        .find('.btn')
+        .on('click', (e) => {
+          const button = self._getButtonByName($(e.target).data('button-name'));
+          self._$modal.on('hidden.bs.modal', () => {
+            self._callback(
+              button.name === 'yes',
+              self._dialog.next.bind(self._dialog),
+              self._dialog.prev.bind(self._dialog),
+              () => self._$modal.modal('hide')
+            );
+          });
+          self.hide();
         });
-        self.hide();
-      });
+    } else {
+      const self = this;
+      this._$modal
+        .find('.btn')
+        .on('click', (e) => {
+          const button = self._getButtonByName($(e.target).data('button-name'));
+          self._$modal.on('hidden.bs.modal', () => {
+            button.callback(
+              self._dialog.next.bind(self._dialog),
+              self._dialog.prev.bind(self._dialog),
+              () => self._$modal.modal('hide')
+            );
+          });
+          self.hide();
+        });
+    }
   },
 
 };
@@ -93,8 +123,8 @@ Dialog.prototype = {
    * The callback triggers when any of the two buttons is pressed and
    * takes a boolean result param.
    */
-  confirm(options, confirmed) {
-    this._addItem('confirm', confirmed, options);
+  confirm(options) {
+    this._addItem('confirm', options, options.callback);
     return this;
   },
 
@@ -192,6 +222,11 @@ Template.dialog_buttons_list.events({
       .alert({
         title: 'Chao',
         template: 'bye',
+      })
+      .confirm({
+        title: 'Are you sure?',
+        template: 'confirm',
+        callback: (result) => console.log(result),
       })
       .show();
   },

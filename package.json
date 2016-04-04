@@ -7,15 +7,15 @@
     "pretest": "npm run lint --silent"
   },
   "eslintConfig": {
-   "plugins": [
-     "meteor"
-   ],
-   "extends": [
-     "airbnb/base",
-     "plugin:meteor/guide"
-   ],
-   "rules": {}
- },
+    "plugins": [
+      "meteor"
+    ],
+    "extends": [
+      "airbnb/base",
+      "plugin:meteor/guide"
+    ],
+    "rules": {}
+  },
   "dependencies": {
     "meteor-node-stubs": "~0.2.0"
   },
